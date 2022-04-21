@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  vehicle_emulator:
+    build: vehicleEmulator/
+    ports:
+      - "4000:8080"
+    restart: always
+
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      # Только для локального тестирования
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+  consumer:
+    build: .
+    command: python main.py
+    ports:
+      - "8000:8000"
+    links:
+      - mongo
+      - vehicle_emulator
+    depends_on:
+      - vehicle_emulator
+      - mongo
+    volumes:
+      - ./consumer:/app
+
+volumes:
+  consumer:
